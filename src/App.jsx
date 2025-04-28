@@ -1,5 +1,6 @@
 import { getDatabase, onValue, push, ref, set } from "firebase/database";
 import React, { useEffect, useState } from "react";
+import { FaTrash } from "react-icons/fa";
 
 const App = () => {
   const db = getDatabase();
@@ -24,7 +25,7 @@ const App = () => {
   const [nameinputValue, setnameinputValue] = useState("");
   const [priceinputValue, setpriceinputValue] = useState("");
   const [userDataList, setuserDataList] = useState([]);
-  
+
   const handleInput = (event) => {
     const { name, value } = event.target;
     if (name == "product") {
@@ -34,22 +35,21 @@ const App = () => {
     }
   };
 
-
- useEffect(() => {
-   const fatchdata = () => {
-     const UserRef = ref(db, "users/");
-     onValue(UserRef, (snapshot) => {
-       let userProductlist = [];
-       snapshot.forEach((item) => {
-           userProductlist.push({...item.val(), productKey: item.key})
-       });
-       setuserDataList(userProductlist);
-     });
-   };
-   fatchdata();
- }, []);
+  useEffect(() => {
+    const fatchdata = () => {
+      const UserRef = ref(db, "users/");
+      onValue(UserRef, (snapshot) => {
+        let userProductlist = [];
+        snapshot.forEach((item) => {
+          userProductlist.push({ ...item.val(), productKey: item.key });
+        });
+        setuserDataList(userProductlist);
+      });
+    };
+    fatchdata();
+  }, []);
   console.log(userDataList);
-  
+
   const handleSubmit = () => {
     set(push(ref(db, "users/")), {
       productName: nameinputValue,
@@ -63,54 +63,61 @@ const App = () => {
       });
   };
 
-
-  const handleDelete = () => {};
+  // const handleDelete = () => {};
   return (
-    <div className=" h-screen w-full flex items-center justify-center">
-      <div className="h-full w-[50%] flex items-center justify-center">
-        <div className="flex flex-col gap-5 items-center">
-          <div className="flex flex-col gap-4">
+    <>
+      <div className="flex flex-col items-center justify-center h-screen w-full bg-[#f0f4f8] p-4">
+        <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-xl">
+          {/* Form */}
+          <div className="flex flex-col gap-6 mb-8">
             <input
               name="product"
               onChange={handleInput}
-              className="peer h-full w-full rounded-md border border-blue-gray-200 bg-transparent px-3 py-3 font-sans text-sm font-normal text-blue-gray-700  transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2"
+              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-gray-400"
               placeholder="Product Name"
             />
             <input
+              type="number"
               name="price"
               onChange={handleInput}
-              className="peer h-full w-full rounded-md border border-blue-gray-200 bg-transparent px-3 py-3 font-sans text-sm font-normal text-blue-gray-700  transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2"
-              placeholder="Price"
+              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-gray-400"
+              placeholder="Product Price"
             />
-          </div>
-          <button
-            onClick={handleSubmit}
-            className="py-3 px-6 bg-red-400 rounded text-white cursor-pointer"
-          >
-            submit
-          </button>
-        </div>
-      </div>
-      <div className="h-full w-[50%] bg-blue-400">
-        <div className="flex items-center flex-col justify-center h-full">
-          {userDataList.map((item, index) => (
-            <div
-              key={index}
-              className="flex gap-3 items-center justify-center py-5 px-8  my-3"
+            <button
+              onClick={handleSubmit}
+              className="w-full py-3 rounded-xl text-white bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 transition-all font-semibold cursor-pointer"
             >
-              <span>{item.productName}</span>
-              <span>{item.ProductPrice}</span>
-              <button
-                onClick={handleDelete}
-                className="bg-red-400 py-4 px-8 text-white cursor-pointer"
+              Add Product
+            </button>
+          </div>
+
+          {/* List */}
+          <div className="flex flex-col gap-4 max-h-[375px] overflow-y-auto pr-2 scroll-smooth scrollbar-hide">
+            {userDataList.map((item, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between w-full bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-all"
               >
-                Delete
-              </button>
-            </div>
-          ))}
+                <div className="flex flex-col">
+                  <span className="text-lg font-semibold text-gray-800">
+                    {item.productName}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    ${item.ProductPrice}
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleDelete(index)}
+                  className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-full transition-all cursor-pointer"
+                >
+                  <FaTrash size={18} />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
